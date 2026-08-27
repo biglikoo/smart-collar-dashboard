@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Collar {
+  id        String      @id
+  breed     String
+  last_seen DateTime    @default(now())
+  status    String      @default("ONLINE")
+  telemetry Telemetry[]
+}
+
+model Telemetry {
+  id                Int      @id @default(autoincrement())
+  device_id         String
+  battery_mv        Int
+  diagnostic_flag   Int      // Maps to Predicted_State
+  state_label       String?
+  core_temp_c       Float?
+  env_temp_c        Float?
+  resp_rate         Int?
+  dai               Int?
+  
+  // Edge ML Performance Metrics
+  feature_time_ms   Float?
+  inference_time_ms Float?
+  total_edge_ms     Float?
+
+  timestamp         DateTime @default(now())
+  
+  collar            Collar   @relation(fields: [device_id], references: [id], onDelete: Cascade)
+}
